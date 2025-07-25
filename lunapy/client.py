@@ -46,17 +46,24 @@ class LunaClient:
         await self.luna_api.session.close()
 
     async def start(self):
+        async def connect_ws(url: str, timeout: float = 5.0):
+            return await asyncio.wait_for(connect(url), timeout)
+
         while True:
             try:
-                async for ws in connect(f"ws://{self.luna_host}/ws"):
-                    print("연결 성공")
+                ws = await connect_ws(f"ws://{self.luna_host}/ws")
+                print("연결 성공")
+
+                try:
                     async for msg in ws:
                         try:
                             self._process(msg)
                         except Exception as e:
                             print("Processing Error", e)
-            except (ConnectionClosed, IOError):
-                print("연결 끊김. 3초 후 재연결 합니다.")
+                finally:
+                    await ws.close()
+            except (ConnectionClosed, IOError, Exception) as e:
+                print(f"3초 후 재연결 합니다 {e}")
                 await asyncio.sleep(3)
                 continue
 
