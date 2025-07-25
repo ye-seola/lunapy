@@ -55,6 +55,15 @@ class LunaAPI:
             if not resp.ok:
                 print(await resp.json())
 
+    async def query(self, query: str, binds: list[str | int | bool | float] = []):
+        async with self.session.post(
+            f"{self.luna_host}/query", json={"query": query, "binds": binds}
+        ) as resp:
+            if not resp.ok:
+                raise Exception(await resp.json())
+
+            return await resp.json()
+
 
 @dataclass
 class LunaRawChatLog:

@@ -14,6 +14,7 @@ from lunapy.event import (
     UserLeft,
 )
 from lunapy.router import Router
+from lunapy.services import ChatService
 from lunapy.type import (
     AllMention,
     Channel,
@@ -35,10 +36,14 @@ class LunaClient:
         self.luna_host = luna_host
         self.luna_api = LunaAPI("http://" + self.luna_host)
         self.dispatcher = Dispatcher()
+        self.chat_service = ChatService(self.luna_api)
 
     def include_router(self, router: Router):
         for event_name, handler in router.get_handlers():
             self.dispatcher.register(event_name, handler)
+
+    async def close(self):
+        await self.luna_api.session.close()
 
     async def start(self):
         while True:
@@ -46,19 +51,23 @@ class LunaClient:
                 async for ws in connect(f"ws://{self.luna_host}/ws"):
                     print("연결 성공")
                     async for msg in ws:
-                        self._process(msg)
+                        try:
+                            self._process(msg)
+                        except Exception as e:
+                            print("Processing Error", e)
             except (ConnectionClosed, IOError):
                 print("연결 끊김. 3초 후 재연결 합니다.")
                 await asyncio.sleep(3)
                 continue
 
     def _process(self, msg: str | bytes):
-        container = {}
-
         event_name: LunaEventName = "message"
         chat = self._parse(msg)
 
-        container[ChatContext] = chat
+        container = {
+            ChatContext: chat,
+            ChatService: self.chat_service,
+        }
 
         if chat.message.type == MessageType.FEED:
             feed = json.loads(chat.message.content)

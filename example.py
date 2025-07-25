@@ -1,6 +1,7 @@
 import asyncio
 from lunapy import LunaClient, Router, ChatContext
 from lunapy.event import MessageDeleted, MessageHidden, UserJoined, UserKicked, UserLeft
+from lunapy.services import ChatService
 
 router = Router()
 
@@ -14,7 +15,7 @@ async def on_message(chat: ChatContext):
     print(chat)
 
     if chat.message.content == "/asdf":
-        await chat.reply('HELLO')
+        await chat.reply("HELLO")
 
 
 @router.on_event("user_joined")
@@ -33,8 +34,11 @@ async def on_user_left(chat: ChatContext, ev: UserLeft):
 
 
 @router.on_event("message_deleted")
-async def on_message_deleted(chat: ChatContext, ev: MessageDeleted):
+async def on_message_deleted(
+    chat: ChatContext, ev: MessageDeleted, chat_service: ChatService
+):
     print("message_deleted", ev)
+    print(await chat_service.get_chatlogs_by_log_id(ev.log_id))
 
 
 @router.on_event("message_hidden")
@@ -48,7 +52,8 @@ async def main():
 
     try:
         await client.start()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        await client.close()
         print("\n프로그램을 종료합니다.")
 
 

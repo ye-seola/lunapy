@@ -159,3 +159,16 @@ class FeedType(Enum):
     @classmethod
     def _missing_(cls, value):
         return cls.UNKNOWN
+
+
+@dataclass
+class ChatLog:
+    db_id: int
+    log_id: int
+    chat_id: int
+    user_id: int
+    nickname: str
+    type: int
+    message: str
+    attachment: str
+    sent_at: int
