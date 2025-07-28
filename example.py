@@ -1,4 +1,5 @@
 import asyncio
+from dataclasses import dataclass
 from lunapy import LunaClient, Router, ChatContext
 from lunapy.event import MessageDeleted, MessageHidden, UserJoined, UserKicked, UserLeft
 from lunapy.services import ChatService
@@ -11,11 +12,10 @@ router = Router()
 
 
 @router.on_event("message")
-async def on_message(chat: ChatContext):
-    print(chat)
-
+async def on_message(chat: ChatContext["AppState"]):
     if chat.message.content == "/asdf":
-        await chat.reply("HELLO")
+        chat.state.count += 1
+        await chat.reply("HELLO", chat.state.count)
 
 
 @router.on_event("user_joined")
@@ -46,8 +46,13 @@ async def on_message_hidden(chat: ChatContext, ev: MessageHidden):
     print("message_hidden", ev)
 
 
+@dataclass
+class AppState:
+    count: int = 0
+
+
 async def main():
-    client = LunaClient("127.0.0.1:5612")
+    client = LunaClient("127.0.0.1:5612", AppState())
     client.include_router(router)
 
     try:

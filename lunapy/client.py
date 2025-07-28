@@ -32,11 +32,12 @@ from lunapy.type import (
 
 
 class LunaClient:
-    def __init__(self, luna_host: str):
+    def __init__(self, luna_host: str, state: object):
         self.luna_host = luna_host
         self.luna_api = LunaAPI("http://" + self.luna_host)
         self.dispatcher = Dispatcher()
         self.chat_service = ChatService(self.luna_api)
+        self.state = state
 
     def include_router(self, router: Router):
         for event_name, handler in router.get_handlers():
@@ -182,6 +183,7 @@ class LunaClient:
             is_mine=chatlog.v_meta["isMine"],
             origin=chatlog.v_meta["origin"],
             api=self.luna_api,
+            state=self.state,
         )
 
     def _parse_mention_info(self, attachment: str):

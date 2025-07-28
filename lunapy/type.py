@@ -4,15 +4,20 @@ import typing
 
 from lunapy.api import Media, LunaAPI
 
+from typing import Generic, TypeVar
+
+T = TypeVar("T")
+
 
 @dataclass
-class ChatContext:
+class ChatContext(Generic[T]):
     sender: "User"
     channel: "Channel"
     message: "Message"
     is_mine: bool
     origin: str
     api: LunaAPI
+    state: T
 
     async def reply(self, *values: object, sep: str | None = " "):
         await self.api.reply(self.channel.id, *values, sep=sep)
