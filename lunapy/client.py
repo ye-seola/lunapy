@@ -14,7 +14,7 @@ from lunapy.event import (
     UserLeft,
 )
 from lunapy.router import Router
-from lunapy.services import ChatService
+from lunapy.helper import ChatHelper
 from lunapy.type import (
     AllMention,
     Channel,
@@ -36,7 +36,7 @@ class LunaClient:
         self.luna_host = luna_host
         self.luna_api = LunaAPI("http://" + self.luna_host)
         self.dispatcher = Dispatcher()
-        self.chat_service = ChatService(self.luna_api)
+        self.chat_service = ChatHelper(self.luna_api)
         self.state = state
 
     def include_router(self, router: Router):
@@ -74,7 +74,7 @@ class LunaClient:
 
         container = {
             ChatContext: chat,
-            ChatService: self.chat_service,
+            ChatHelper: self.chat_service,
         }
 
         if chat.message.type == MessageType.FEED:

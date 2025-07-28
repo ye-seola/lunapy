@@ -2,7 +2,7 @@ from lunapy.api import LunaAPI
 from lunapy.type import ChatLog
 
 
-class ChatService:
+class ChatHelper:
     def __init__(self, luna_api: LunaAPI):
         self.luna_api = luna_api
 

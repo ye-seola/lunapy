@@ -2,7 +2,7 @@ import asyncio
 from dataclasses import dataclass
 from lunapy import LunaClient, Router, ChatContext
 from lunapy.event import MessageDeleted, MessageHidden, UserJoined, UserKicked, UserLeft
-from lunapy.services import ChatService
+from lunapy.helper import ChatHelper
 
 router = Router()
 
@@ -35,7 +35,7 @@ async def on_user_left(chat: ChatContext, ev: UserLeft):
 
 @router.on_event("message_deleted")
 async def on_message_deleted(
-    chat: ChatContext, ev: MessageDeleted, chat_service: ChatService
+    chat: ChatContext, ev: MessageDeleted, chat_service: ChatHelper
 ):
     print("message_deleted", ev)
     print(await chat_service.get_chatlogs_by_log_id(ev.log_id))
